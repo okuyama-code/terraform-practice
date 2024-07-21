@@ -1,0 +1,27 @@
+# Terraformの一時ディレクトリ
+.terraform/
+
+# tfstateファイル
+*.tfstate
+*.tfstate.*
+
+# クラッシュログファイル
+crash.log
+crash.*.log
+
+# 変数定義ファイル（機密情報を含む可能性があるため）
+*.tfvars
+*.tfvars.json
+
+# CLIの設定ファイル
+.terraformrc
+terraform.rc
+
+# オーバーライドファイル
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# 実行計画ファイル（.terraform.lock.hcl は含めない）
+.terraform.plan
