@@ -1,20 +1,12 @@
-provider "aws" {
-  region  = "ap-northeast-1"
+module "web_server" {
+  source = "./http_server"
+  instance_type = "t3.micro"
 }
 
-resource "aws_instance" "example" {
-  # 2024年7月10日時点での最新Amazon Linux 2 AMI
-  ami = "ami-0eda63ec8af4f056e"
-  # EC2（Elastic Compute Cloud）インスタンスタイプ
-  instance_type = "t3.micro"
+provider "aws" {
+  region = "ap-northeast-1"
+}
 
-  user_data = <<EOF
-    #!/bin/bash
-    yum install -y httpd
-    systemctl start httpd.service
-  EOF
-
-  tags = {
-    Name = "example"
-  }
+output "public_dns" {
+  value = module.web_server.public_dns
 }

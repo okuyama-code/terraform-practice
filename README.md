@@ -36,6 +36,14 @@ terraform destroy -auto-approve
 terraform --help
 ```
 
+### モジュールを利用する場合
+applyモジュールを利用する側のディレクトリで実行する
+モジュールを取得するための事前準備あり。
+```
+terraform get
+terraform init
+```
+
 ## aws コマンド
 アクセスキーなどの設定
 ```
