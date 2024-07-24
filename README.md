@@ -1,5 +1,8 @@
 ## 参考本
 実践Terraform　AWSにおけるシステム設計とベストプラクティス
+完成コード
+https://github.com/tmknom/example-pragmatic-terraform/tree/main
+
 
 ハンズオン 54
 流し見 76
@@ -93,4 +96,34 @@ https://www.skygroup.jp/media/article/2160/
 ## 新しく作る場合
 ```
 rm -rf .terraform
+```
+
+## ファイルレイアウト
+第5章から第16で登場するサンプルコードは、基本的に同一ディレクトリ内での実装できる。
+├── は、これがリストの最初または中間の項目であることを示しています。
+└── はこれがリストの最後の項目であることを示しています。
+
+```
+└── main.tf
+```
+
+あるいは、次のように複数ファイルへ分割することもできる。
+Terraformは拡張子(tf)のファイルを自動的に読み込むため、単一ファイルと同様に動作します。
+network.tf: VPC、サブネット、セキュリティグループなどのネットワークインフラ
+lb.tf: Application Load BalancerやNetwork Load Balancerの設定
+ecs.tf: ECSクラスター、タスク定義、サービスなどのコンテナ関連の設定
+```
+├── network.tf
+├── lb.tf
+└── ecs.tf
+```
+
+例外はモジュールで「5.2.4 IAM ロールのモジュール化」や「7.4.2 セキュリティグループのモジュール化」では、サブディレクトリは以下にコードを実装します。
+
+```
+├── iam_role/
+  └── main.tf
+├── security_group/
+  └── main.tf
+└── main.tf
 ```
