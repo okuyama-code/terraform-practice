@@ -1,5 +1,8 @@
-## 参考記事
-https://qiita.com/keke21/items/6daaa8a5b9b360ad2369
+## 参考本
+実践Terraform　AWSにおけるシステム設計とベストプラクティス
+
+## 今回作るAWS アーキテクチャー図
+<img width="349" alt="tf-book" src="https://github.com/user-attachments/assets/02bc29b0-f229-43d5-bd8c-1a2a24f086cf">
 
 ## terraform コマンド
 ```
