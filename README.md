@@ -1,8 +1,14 @@
 ## 参考本
 実践Terraform　AWSにおけるシステム設計とベストプラクティス
 
+ハンズオン 54
+流し見 76
+
 ## 今回作るAWS アーキテクチャー図
 <img width="349" alt="tf-book" src="https://github.com/user-attachments/assets/02bc29b0-f229-43d5-bd8c-1a2a24f086cf">
+
+README.mdに画像を表示させる方法
+https://qiita.com/r_midori/items/2c4feb5de05535441bc8
 
 ## terraform コマンド
 ```
