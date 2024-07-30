@@ -1,8 +1,12 @@
 module "describe_regions_for_ec2" {
-  source = "./iam_role"
-  name = "describe-regions-for-ec2"
+  source     = "./iam_role"
+  name       = "describe-regions-for-ec2"
   identifier = "ec2.amazonaws.com"
-  policy = data.aws_iam_policy_document.allow_describe_regions.json
+  policy     = data.aws_iam_policy_document.allow_describe_regions.json
+}
+
+provider "aws" {
+  region = "ap-northeast-1"  # 東京リージョン。必要に応じて変更してください
 }
 
 # ポリシードキュメント (権限)
@@ -22,15 +26,15 @@ module "describe_regions_for_ec2" {
 # ポリシードキュメントの定義
 data "aws_iam_policy_document" "allow_describe_regions" {
   statement {
-    effect = "Allow"
-    actions = ["ec2:DescribeRegions"] # リージョンの一覧を取得する
+    effect    = "Allow"
+    actions   = ["ec2:DescribeRegions"] # リージョンの一覧を取得する
     resources = ["*"]
   }
 }
 
 # IAMポリシーの定義
 resource "aws_iam_policy" "example" {
-  name = "example"
+  name   = "example"
   policy = data.aws_iam_policy_document.allow_describe_regions.json
 }
 
@@ -59,13 +63,13 @@ resource "aws_iam_role" "example" {
 
 # IAMポリシーのアタッチ
 resource "aws_iam_role_policy_attachment" "example" {
-  role = aws_iam_role.example.name
+  role       = aws_iam_role.example.name
   policy_arn = aws_iam_policy.example.arn
 }
 
 # 外部公開しないプライベートバケットから作成
 resource "aws_s3_bucket" "private" {
-  bucket = "private-pragmatic-terraform"
+  bucket = "private-pragmatic-terraform-${random_string.bucket_suffix.result}"
 
   versioning {
     enabled = true
@@ -74,7 +78,7 @@ resource "aws_s3_bucket" "private" {
   # バケット内のデータを自動的に暗号化する設定
   server_side_encryption_configuration {
     rule {
-      apply_sever_side_encryption_by_default {
+      apply_server_side_encryption_by_default {
         sse_algorithm = "AES256"
       }
     }
@@ -83,22 +87,17 @@ resource "aws_s3_bucket" "private" {
 
 # バケットへのパブリックアクセスをブロックする設定
 resource "aws_s3_bucket_public_access_block" "private" {
-  bucket = aws_s3_bucket.private.id
-  block_public_acls = true
-  block_public_policy = true
-  ignore_public_acls = true
+  bucket                  = aws_s3_bucket.private.id
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
   restrict_public_buckets = true
 }
 
 # 外部公開するパブリックバケットの作成
 resource "aws_s3_bucket" "public" {
-  bucket = "pulic-pragmatic-terraform"
-  # アクセスコントロールリスト（ACL）の設定
-  # "public-read"は、オブジェクトの読み取りを全員に許可する
-  acl = "public-read"
+  bucket = "public-pragmatic-terraform-${random_string.bucket_suffix.result}"
 
-  # 特定のWebサイト（この場合は https://example.com）から安全にアクセスできる公開S3バケットが作成されます。
-  # CORS（Cross-Origin Resource Sharing：クロスオリジンリソース共有）
   cors_rule {
     # リクエストを許可するオリジン（ドメイン）
     allowed_origins = ["https://example.com"]
@@ -110,8 +109,8 @@ resource "aws_s3_bucket" "public" {
 
 # AWSの各種サービスがログを保持するためのログバケットを作成
 # ログバケットの定義
-resource "aws_s3_buket" "alb_log" {
-  bucket = "alb-log-pragmatic-terraform"
+resource "aws_s3_bucket" "alb_log" {
+  bucket = "alb-log-pragmatic-terraform-${random_string.bucket_suffix.result}"
 
   lifecycle_rule {
     enabled = true
@@ -120,4 +119,43 @@ resource "aws_s3_buket" "alb_log" {
       days = "180"
     }
   }
+}
+
+// バケットポリシーを定義
+resource "aws_s3_bucket_policy" "alb_log" {
+  # ポリシーを適用するバケットのID
+  bucket = aws_s3_bucket.alb_log.id
+  # ポリシーの内容を指定
+  policy = data.aws_iam_policy_document.alb_log.json
+}
+
+# IAM ポリシードキュメントの定義
+data "aws_iam_policy_document" "alb_log" {
+  statement {
+    effect = "Allow"
+    # S3にオブジェクトを配置する権限を付与
+    actions = ["s3:PutObject"]
+    # 権限を適用するリソース（S3バケット内のすべてのオブジェクト）
+    resources = ["arn:aws:s3:::${aws_s3_bucket.alb_log.id}/*"]
+
+    # 権限を付与する対象（プリンシパル）
+    principals {
+      type = "AWS"
+      # 特定のAWSアカウントID
+      identifiers = ["582318560864"]
+    }
+  }
+}
+
+//S3バケットの強制削除
+resource "aws_s3_bucket" "force_destroy" {
+  bucket = "force-destroy-pragmatic-terraform-${random_string.bucket_suffix.result}"
+  force_destroy = true
+}
+
+# ランダムな文字列を生成（バケット名の一意性のため）
+resource "random_string" "bucket_suffix" {
+  length  = 8
+  special = false
+  upper   = false
 }
